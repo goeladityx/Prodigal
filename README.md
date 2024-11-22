@@ -63,6 +63,6 @@ connection = pymysql.connect(
     user="your_user",
     write_timeout=timeout,
 )
-
+```
 ### **2. After this run the main file**
 ```python main.py
