@@ -146,3 +146,25 @@ The script provides the following query options for testing:
     ```sql
     SELECT COUNT(*) FROM mutual_funds;
     ```
+
+---
+
+## **Visual Summary**
+
+### **Key Features**
+
+| Feature               | Description                                           |
+|-----------------------|-------------------------------------------------------|
+| **Data Scraping**     | Fetches data for a specified date range.              |
+| **Historical & Incremental** | Handles both historical and regular updates.         |
+| **Interactive Querying** | Provides predefined and custom query options.          |
+
+---
+
+### **Performance Measures**
+
+| Measure               | Description                                           |
+|-----------------------|-------------------------------------------------------|
+| **Batch Insertions**  | Minimizes database overhead.                          |
+| **Indexing**          | Improves lookup and query performance.                |
+| **Duplicate Handling**| Skips rows with the same `scheme_code` and `nav_date`.|
