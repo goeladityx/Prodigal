@@ -64,5 +64,85 @@ connection = pymysql.connect(
     write_timeout=timeout,
 )
 ```
-### **2. After this run the main file**
-```python main.py
+### **3. After this run the main file**
+```python
+python main.py
+```
+
+---
+
+## **What Happens in the Main Function?**
+
+1. **Table Clearance**
+   - Deletes all existing data in the `mutual_funds` table for a fresh start.
+
+2. **Ingest Historical Data**
+   - Adds historical data for a predefined date range (e.g., `01-Oct-2024` to `03-Oct-2024`).
+
+3. **Ingest Regular Data**
+   - Automates incremental data ingestion for the last two days, ensuring the database remains up-to-date.
+
+4. **Interactive Query Options**
+   - Allows users to test and retrieve data using pre-defined and custom queries.
+
+5. **Database Connection Closure**
+   - Ensures the database connection is closed properly after execution.
+
+---
+
+## **Exception Handling**
+
+1. **Invalid Data**
+   - Rows with invalid `net_asset_value`, `repurchase_price`, or `sale_price` are skipped during insertion.
+   - Logs skipped rows for debugging.
+
+2. **Duplicate Rows**
+   - Checks for existing rows with the same `scheme_code` and `nav_date` before insertion.
+   - Skips duplicate rows to maintain data integrity.
+
+3. **Database Errors**
+   - Handles `pymysql` exceptions gracefully and ensures partial insertions are rolled back.
+  
+---
+
+## **Performance Measures**
+
+1. **Batch Insertions**
+   - Ensures rows are inserted in batches to minimize database overhead.
+
+2. **Indexing**
+   - Indexes on `scheme_code` and `nav_date` improve query performance.
+
+3. **Incremental Updates**
+   - Regular ingestion adds only the latest data, reducing the need to reprocess the entire dataset.
+
+---
+
+## **Query Options**
+
+The script provides the following query options for testing:
+
+### **1. Retrieve NAV Trends**
+- Retrieves the NAV history for a specific mutual fund.
+- **Example Query**:
+    ```sql
+    SELECT nav_date, net_asset_value 
+    FROM mutual_funds 
+    WHERE scheme_code = '139617';
+    ```
+
+### **2. Compare NAVs Across Funds**
+- Compares NAVs for multiple funds within a specific date range.
+- **Example Query**:
+    ```sql
+    SELECT scheme_code, scheme_name, nav_date, net_asset_value 
+    FROM mutual_funds 
+    WHERE nav_date BETWEEN '2024-11-01' AND '2024-11-07';
+    ```
+
+### **3. Run Custom SQL Queries**
+- Allows users to execute any SQL query directly.
+- **Example Query**:
+    ```sql
+    SELECT COUNT(*) FROM mutual_funds;
+    ```
