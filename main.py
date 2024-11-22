@@ -57,6 +57,31 @@ def create_schema(connection):
     cursor.execute(create_table_query)
     print("Schema created successfully!")
 
+def retry_failed_rows(failed_rows, connection):
+
+    cursor = connection.cursor()
+    insert_query = """
+        INSERT INTO mutual_funds (
+            scheme_code, scheme_name, isin_div_payout_growth, 
+            isin_div_reinvestment, net_asset_value, 
+            repurchase_price, sale_price, nav_date
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+    """
+    
+    for row in failed_rows:
+        try:
+            row[4] = float(row[4]) if row[4] not in ('', None) else None  # net_asset_value
+            row[5] = float(row[5]) if row[5] not in ('', None) else None  # repurchase_price
+            row[6] = float(row[6]) if row[6] not in ('', None) else None  # sale_price
+            
+            cursor.execute(insert_query, row)
+        
+        except Exception as e:
+            print(f"Retry failed for row {row}: {e}")
+    
+    connection.commit()
+
 def add_rows(data_list, connection):
     
     cursor = connection.cursor()
@@ -68,8 +93,25 @@ def add_rows(data_list, connection):
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
     """
-    cursor.executemany(insert_query, data_list)
+    
+    failed_rows = []
+    
+    for row in data_list:
+        try:
+            row[4] = float(row[4]) if row[4] != '' else None  # net_asset_value
+            row[5] = float(row[5]) if row[5] != '' else None  # repurchase_price
+            row[6] = float(row[6]) if row[6] != '' else None  # sale_price
+            
+            cursor.execute(insert_query, row)
+        
+        except Exception as e:
+            failed_rows.append(row)
+    
     connection.commit()
+
+    # Retrying to add failed rows
+    if failed_rows:
+        retry_failed_rows(failed_rows, connection)
     
 def delete_row(condition, connection):
     cursor = connection.cursor()
@@ -149,7 +191,7 @@ def data_sraper(start_date, end_date):
     end_date_obj = datetime.strptime(end_date, "%d-%b-%Y")
     current_start = start_date_obj
     while current_start < end_date_obj:
-        full_list = []
+        final_list = []
         current_end = current_start + timedelta(days=2)
         
         if current_end > end_date_obj:
@@ -173,13 +215,12 @@ def data_sraper(start_date, end_date):
 # =============================================================================
 
             if len(items_list) > 1 and switch == 1:
-                full_list.append(items_list)
+                final_list.append(items_list)
                 
             elif len(items_list) > 1 and switch == 0:
                 switch = 1
-            
-        add_rows(full_list, connection)
         
+        add_rows(final_list, connection)
         current_start = current_end
         
 def main():
@@ -250,4 +291,8 @@ def main():
 
 # Run the main function
 if __name__ == "__main__":
+# =============================================================================
+#     Before running it again, you can directly query the DB for different 
+#     kind of data already been added
+# =============================================================================
     main()
