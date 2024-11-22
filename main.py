@@ -47,44 +47,62 @@ def create_schema(connection):
         scheme_name VARCHAR(255) NOT NULL,
         isin_div_payout_growth VARCHAR(20),
         isin_div_reinvestment VARCHAR(20),
-        net_asset_value DECIMAL(10, 4) NOT NULL,
+        net_asset_value DECIMAL(10, 4),
         repurchase_price DECIMAL(10, 4),
         sale_price DECIMAL(10, 4),
-        nav_date DATE NOT NULL,
+        nav_date DATE,
         INDEX idx_scheme_code_date (scheme_code, nav_date)
     ) ENGINE=InnoDB;
     """
     cursor.execute(create_table_query)
     print("Schema created successfully!")
 
-def retry_failed_rows(failed_rows, connection):
-
-    cursor = connection.cursor()
-    insert_query = """
-        INSERT INTO mutual_funds (
-            scheme_code, scheme_name, isin_div_payout_growth, 
-            isin_div_reinvestment, net_asset_value, 
-            repurchase_price, sale_price, nav_date
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-    """
-    
-    for row in failed_rows:
-        try:
-            row[4] = float(row[4]) if row[4] not in ('', None) else None  # net_asset_value
-            row[5] = float(row[5]) if row[5] not in ('', None) else None  # repurchase_price
-            row[6] = float(row[6]) if row[6] not in ('', None) else None  # sale_price
-            
-            cursor.execute(insert_query, row)
-        
-        except Exception as e:
-            print(f"Retry failed for row {row}: {e}")
-    
-    connection.commit()
+# =============================================================================
+# def retry_failed_rows(failed_rows, connection):
+# 
+#     cursor = connection.cursor()
+#     insert_query = """
+#         INSERT INTO mutual_funds (
+#             scheme_code, scheme_name, isin_div_payout_growth, 
+#             isin_div_reinvestment, net_asset_value, 
+#             repurchase_price, sale_price, nav_date
+#         )
+#         VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+#     """
+#     
+#     for row in failed_rows:
+#         try:
+#             row[4] = float(row[4]) if row[4] not in ('', None) else None  # net_asset_value
+#             row[5] = float(row[5]) if row[5] not in ('', None) else None  # repurchase_price
+#             row[6] = float(row[6]) if row[6] not in ('', None) else None  # sale_price
+#             
+#             cursor.execute(insert_query, row)
+#         
+#         except Exception as e:
+#             continue
+#     
+#     connection.commit()
+# =============================================================================
 
 def add_rows(data_list, connection):
     
     cursor = connection.cursor()
+    
+    # Exception handling
+    for i in range(0,2):
+        if data_list[i] in ('', None) :
+            return
+    
+    for i in range(2,4):
+        if data_list[i] in ('', None) :
+            data_list[i] = 'NA'
+    
+    for i in range(4,7):
+        if data_list[i] in ('', None) :
+            data_list[i] = 0.0
+    
+    data_list[7] = datetime.strptime(data_list[7], "%d-%b-%Y").strftime("%Y-%m-%d")
+    
     insert_query = """
         INSERT INTO mutual_funds (
             scheme_code, scheme_name, isin_div_payout_growth, 
@@ -94,24 +112,13 @@ def add_rows(data_list, connection):
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
     """
     
-    failed_rows = []
     
-    for row in data_list:
-        try:
-            row[4] = float(row[4]) if row[4] != '' else None  # net_asset_value
-            row[5] = float(row[5]) if row[5] != '' else None  # repurchase_price
-            row[6] = float(row[6]) if row[6] != '' else None  # sale_price
-            
-            cursor.execute(insert_query, row)
+    try:
+        cursor.execute(insert_query, data_list)
+        connection.commit()
         
-        except Exception as e:
-            failed_rows.append(row)
-    
-    connection.commit()
-
-    # Retrying to add failed rows
-    if failed_rows:
-        retry_failed_rows(failed_rows, connection)
+    except Exception as e:
+        print(e)
     
 def delete_row(condition, connection):
     cursor = connection.cursor()
@@ -191,7 +198,7 @@ def data_sraper(start_date, end_date):
     end_date_obj = datetime.strptime(end_date, "%d-%b-%Y")
     current_start = start_date_obj
     while current_start < end_date_obj:
-        final_list = []
+        # final_list = []
         current_end = current_start + timedelta(days=2)
         
         if current_end > end_date_obj:
@@ -215,12 +222,13 @@ def data_sraper(start_date, end_date):
 # =============================================================================
 
             if len(items_list) > 1 and switch == 1:
-                final_list.append(items_list)
+                add_rows(items_list, connection)
+                # final_list.append(items_list)
                 
             elif len(items_list) > 1 and switch == 0:
                 switch = 1
         
-        add_rows(final_list, connection)
+        # add_rows(final_list, connection)
         current_start = current_end
         
 def main():
@@ -233,7 +241,7 @@ def main():
     clear_table(connection)
 
     historical_start_date = "01-Oct-2024"
-    historical_end_date = "31-Oct-2024"
+    historical_end_date = "03-Oct-2024"
     data_sraper(historical_start_date, historical_end_date)
 
     # Pipeline to add data daily
@@ -264,7 +272,12 @@ def main():
             elif choice == "2":
                 start_date = input("Enter the start date (DD-MMM-YYYY): ")
                 end_date = input("Enter the end date (DD-MMM-YYYY): ")
-                results = compare_navs(start_date, end_date)
+                results = compare_navs(datetime.strptime
+                                       (start_date, "%d-%b-%Y").
+                                       strftime("%Y-%m-%d"), 
+                                       datetime.strptime
+                                       (end_date, "%d-%b-%Y").
+                                       strftime("%Y-%m-%d"))
                 print("NAV Comparison:")
                 for row in results:
                     print(row)
