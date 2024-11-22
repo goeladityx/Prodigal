@@ -48,3 +48,21 @@ This project implements a robust data pipeline for scraping mutual fund data, st
   ```bash
   pip install -r requirements.txt
 
+### **2. Add Your Database Credentials**
+Before running the script, update the `establish_connection` function with your database credentials:
+
+```python
+connection = pymysql.connect(
+    charset="utf8mb4",
+    connect_timeout=timeout,
+    cursorclass=pymysql.cursors.DictCursor,
+    db="your_database",
+    host="your_host",
+    password="your_password",
+    port=your_port,
+    user="your_user",
+    write_timeout=timeout,
+)
+
+### **2. After this run the main file**
+```python main.py
