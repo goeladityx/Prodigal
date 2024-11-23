@@ -163,7 +163,6 @@ The script provides the following query options for testing:
 
 | Measure               | Description                                           |
 |-----------------------|-------------------------------------------------------|
-| **Batch Insertions**  | Minimizes database overhead.                          |
 | **Indexing**          | Improves lookup and query performance.                |
 | **Duplicate Handling**| Skips rows with the same `scheme_code` and `nav_date`.|
 
