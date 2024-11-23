@@ -171,19 +171,21 @@ The script provides the following query options for testing:
 
 ---
 
-## Sample Queries Output Format
+## **Sample Queries Output Format**
 
+```bash
 Query Options:
-1. Retrieve NAV trends for a single mutual fund
-2. Compare NAVs across multiple mutual funds within a date range
-3. Run a custom SQL query
-4. Exit
+   - Retrieve NAV trends for a single mutual fund
+   - Compare NAVs across multiple mutual funds within a date range
+   - Run a custom SQL query
+   - Exit
 Enter your choice: 1
 Enter the Scheme Code: 139619
 NAV Trends:
 {'nav_date': datetime.date(2024, 10, 1), 'net_asset_value': Decimal('10.0000')}
 {'nav_date': datetime.date(2024, 10, 3), 'net_asset_value': Decimal('10.0000')}
 {'nav_date': datetime.date(2024, 11, 21), 'net_asset_value': Decimal('10.0000')}
+```
 
 Query Options:
 1. Retrieve NAV trends for a single mutual fund
