@@ -1,6 +1,6 @@
-# Mutual Funds Data Pipeline and Querying System
+# Prodgal - Mutual Funds Data Pipeline
 
-This project implements a robust data pipeline for scraping mutual fund data, storing it in a MySQL database, and providing various querying options for analysis. It is designed to handle exceptions, ensure data consistency, and optimize performance for data ingestion and querying.
+This assignment by Prodigal implements a robust data pipeline for scraping mutual fund data, storing it in a MySQL database, and providing various querying options for analysis. It is designed to handle several exceptions, ensure data consistency, and optimize performance for data ingestion and querying.
 
 ---
 
