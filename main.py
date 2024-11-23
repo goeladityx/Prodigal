@@ -20,6 +20,7 @@ headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 
 def establish_connection():
     
+    print("Establishing database connection...")
     timeout = 30
     connection = pymysql.connect(
         charset="utf8mb4",
@@ -33,11 +34,11 @@ def establish_connection():
         user="avnadmin",
         write_timeout=timeout,
     )
-
+    print("Database connection established.")
     return connection
 
 def create_schema(connection):
-    
+    print("Creating database schema...")
     cursor = connection.cursor()
     
     create_table_query = """
@@ -127,12 +128,15 @@ def delete_row(condition, connection):
     connection.commit()
     
 def clear_table(connection):
+    print("Clearing the table...")
     cursor = connection.cursor()
     clear_query = "TRUNCATE TABLE mutual_funds;"
     cursor.execute(clear_query)
     connection.commit()
+    print("Table cleared.")
     
 def find_and_delete_duplicates(connection):
+    print("Checking for duplicate rows...")
     cursor = connection.cursor()
     
     delete_duplicates_query = """
@@ -145,6 +149,7 @@ def find_and_delete_duplicates(connection):
     """
     cursor.execute(delete_duplicates_query)
     connection.commit()
+    print("Duplicate rows deleted.")
     
 # =============================================================================
 # As I don't have that much infromation regarding Mutual Funds. Here are some 
@@ -191,7 +196,7 @@ def data_sraper(start_date, end_date):
 #     for the time being we will ingest data from 01-Nov-2024 to 10-Nov-2024 here:
 #     as historical data
 # =============================================================================
-    
+    print(f"Starting data scraper for range: {start_date} to {end_date}")
     connection = establish_connection()
 
     start_date_obj = datetime.strptime(start_date, "%d-%b-%Y")
@@ -243,13 +248,16 @@ def main():
     historical_start_date = "01-Oct-2024"
     historical_end_date = "03-Oct-2024"
     data_sraper(historical_start_date, historical_end_date)
+    find_and_delete_duplicates(connection)
+    print("Historical data ingestion complete.")
 
     # Pipeline to add data daily
     def ingest_regular_data():
         today = datetime.today()
-        regular_start_date = (today - timedelta(days=2)).strftime("%d-%b-%Y")
+        regular_start_date = (today - timedelta(days=1)).strftime("%d-%b-%Y")
         regular_end_date = today.strftime("%d-%b-%Y")
         data_sraper(regular_start_date, regular_end_date)
+        find_and_delete_duplicates(connection)
         print("Regular data ingestion complete.")
 
     # Step 5: Query Options
