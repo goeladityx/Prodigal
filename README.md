@@ -168,3 +168,38 @@ The script provides the following query options for testing:
 | **Batch Insertions**  | Minimizes database overhead.                          |
 | **Indexing**          | Improves lookup and query performance.                |
 | **Duplicate Handling**| Skips rows with the same `scheme_code` and `nav_date`.|
+
+---
+
+## Sample Queries Output Format
+
+Query Options:
+1. Retrieve NAV trends for a single mutual fund
+2. Compare NAVs across multiple mutual funds within a date range
+3. Run a custom SQL query
+4. Exit
+Enter your choice: 1
+Enter the Scheme Code: 139619
+NAV Trends:
+{'nav_date': datetime.date(2024, 10, 1), 'net_asset_value': Decimal('10.0000')}
+{'nav_date': datetime.date(2024, 10, 3), 'net_asset_value': Decimal('10.0000')}
+{'nav_date': datetime.date(2024, 11, 21), 'net_asset_value': Decimal('10.0000')}
+
+Query Options:
+1. Retrieve NAV trends for a single mutual fund
+2. Compare NAVs across multiple mutual funds within a date range
+3. Run a custom SQL query
+4. Exit
+Enter your choice: 3
+Enter your custom SQL query: SELECT COUNT(*) AS total_entries FROM mutual_funds;
+Query Results:
+{'total_entries': 24786}
+
+Query Options:
+1. Retrieve NAV trends for a single mutual fund
+2. Compare NAVs across multiple mutual funds within a date range
+3. Run a custom SQL query
+4. Exit
+Enter your choice: 4
+Exiting query options.
+Connection closed. Pipeline execution complete.
