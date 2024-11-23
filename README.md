@@ -92,29 +92,27 @@ python main.py
 
 ## **Exception Handling**
 
-1. **Invalid Data**
-   - Rows with invalid `net_asset_value`, `repurchase_price`, or `sale_price` are skipped during insertion.
-   - Logs skipped rows for debugging.
+1. **Data Sanitization**
+   - Rows with invalid `net_asset_value`, `repurchase_price`, or `sale_price` are reformatted during insertion.
+   - The valid entries to insert the data are added based on data type
 
 2. **Duplicate Rows**
    - Checks for existing rows with the same `scheme_code` and `nav_date` before insertion.
    - Skips duplicate rows to maintain data integrity.
 
-3. **Database Errors**
-   - Handles `pymysql` exceptions gracefully and ensures partial insertions are rolled back.
+3. **Data Insertion Handling**
+   - All Data available in the sheet is added
+   - No extra headers or blank rows are added
   
 ---
 
 ## **Performance Measures**
 
-1. **Batch Insertions**
-   - Ensures rows are inserted in batches to minimize database overhead.
-
-2. **Indexing**
+1. **Indexing**
    - Indexes on `scheme_code` and `nav_date` improve query performance.
 
-3. **Incremental Updates**
-   - Regular ingestion adds only the latest data, reducing the need to reprocess the entire dataset.
+2. **Incremental Updates**
+   - Check for duplications while adding new data
 
 ---
 
