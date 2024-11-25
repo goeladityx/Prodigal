@@ -7,11 +7,6 @@ Created on Fri Nov 22 15:25:11 2024
 
 import requests
 from bs4 import BeautifulSoup
-import ast
-import json
-import re
-import pandas as pd
-from time import sleep
 from datetime import datetime, timedelta
 import pymysql
 
