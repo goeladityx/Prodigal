@@ -42,7 +42,7 @@ This assignment by Prodigal implements a robust data pipeline for scraping mutua
 ## **Setup Instructions**
 
 ### **1. Prerequisites**
-- Python 3.x
+- Python 3.10.10
 - MySQL server
 - Required Python packages (install using `requirements.txt`):
   ```bash
